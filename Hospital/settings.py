@@ -25,7 +25,7 @@ SECRET_KEY = '7sd4o78twjn@*fsl&8mmt0^ol&4t$#r^e(z*nfz1iwgi+92j7y'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['10.21.85.12', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -33,6 +33,8 @@ ALLOWED_HOSTS = ['10.21.85.12', '127.0.0.1', 'localhost']
 INSTALLED_APPS = [
     'corsheaders',
     'medera.apps.MederaConfig',
+    'doctor.apps.DoctorConfig',
+    'receptionist.apps.ReceptionistConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -84,7 +86,8 @@ DATABASES = {
         'HOST': '127.0.0.1',  
         'PORT': '3306',  
         'OPTIONS': {  
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'"  
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            "init_command": "SET foreign_key_checks = 0;"
         }  
     }
 }

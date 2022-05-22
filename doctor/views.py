@@ -1,19 +1,19 @@
+import datetime
 import hashlib
 import json
 import re
 from django.http import HttpResponse
+from django.core import serializers
+
 from doctor.models import doctors
-from medera.models import patient, patientrecord
-from receptionist.views import appointments
 
 # Create your views here.
-
 
 def register(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(request.body)
-        x = patient.objects.filter(user=body['user'])
+        x = doctors.objects.filter(user=body['user'])
         if(x.exists()):
             print("Already exist user")
             return HttpResponse("Already exist user", status=401)
@@ -32,6 +32,9 @@ def register(request):
         if(body['user'].strip() == ""):
             print("Invalid User")
             return HttpResponse("Invalid User", status=401)
+        if(body['cgpa']>10):
+            print("Invalid cgpa")
+            return HttpResponse("Invalid cgpa", status=401)
         if(body['pass1'] == "" or body['pass2'] == ""):
             print("Error Enter Password")
             return HttpResponse("Error Enter Password", status=401)
@@ -55,46 +58,28 @@ def register(request):
             return HttpResponse("Error password doesn't matched", status=401)
         p = body['pass1']
         p = (hashlib.md5(p.encode())).hexdigest()
-        r=doctors.objects.get(user=body['doctor'])
-        patient.objects.create(fname=body['fname'], lname=body['lname'],
-                                mail=body['mail'], phone=body['phone'], doctor_id=r, user=body['user'], pass1=p)
+        doctors.objects.create(fname=body['fname'], lname=body['lname'], college=body['college'], cgpa=body['cgpa'], degree=body['degree'],
+                                mail=body['mail'], phone=body['phone'], dob=body['dob'], user=body['user'], pass1=p)
         print("Success account created")
         return HttpResponse("Success account created", status=201)
 
 
-
 def login(request):
-    if(request.method == "POST"):
+    if(request.method=="POST"):
         body = json.loads(request.body)
         p = body['pass1']
         p = (hashlib.md5(p.encode())).hexdigest()
-        x = patient.objects.filter(user=body['user'], pass1=p)
+        x = doctors.objects.filter(user=body['user'], pass1=p)
         if(not x.exists()):
+            print("Wrong username or password")
             return HttpResponse("Wrong username or password", status=401)
         else:
-            return HttpResponse("success",status=200)
+            print("Success")
+            return HttpResponse("Success", status=201)
 
 
-
-def phome(request):
-    body=json.loads(request.body)
-    try:
-        z=patientrecord.objects.get(user=body['user'])
-    except:
-        x=patient.objects.get(user=body['user'])
-        z=patientrecord(user=x)
-        z.save()
-    return HttpResponse(z,content_type="application/json")
-
-
-
-def appointment(request):
+def getdoctor(request):
     if(request.method=="POST"):
-        body=json.loads(request.body)
-        print(body)
-        y=doctors.objects.get(user=body['doctor'])
-        z=appointments.objects.get(user=body['user'])
-        z.appointment=body['appointment']
-        z.doctor=y
-        z.save()
-        return HttpResponse("Success")
+        x=doctors.objects.all()
+        data=serializers.serialize("json",x)
+        return HttpResponse(data,content_type="application/json")
