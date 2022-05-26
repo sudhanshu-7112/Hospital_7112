@@ -1,18 +1,18 @@
-import datetime
 import hashlib
 import json
 import re
 from django.http import HttpResponse
 from django.core import serializers
-
 from doctor.models import doctors
+from medera.models import appoint, patient, patientrecord
 
 # Create your views here.
+
 
 def register(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
-        print(request.body)
+        print(body)
         x = doctors.objects.filter(user=body['user'])
         if(x.exists()):
             print("Already exist user")
@@ -32,7 +32,7 @@ def register(request):
         if(body['user'].strip() == ""):
             print("Invalid User")
             return HttpResponse("Invalid User", status=401)
-        if(body['cgpa']>10):
+        if(body['cgpa'] > 10):
             print("Invalid cgpa")
             return HttpResponse("Invalid cgpa", status=401)
         if(body['pass1'] == "" or body['pass2'] == ""):
@@ -52,21 +52,22 @@ def register(request):
             return HttpResponse("Error 1 small letter should be in password", status=401)
         if(not re.search("[@#$%&*]", body['pass1'])):
             print("Error atleast 1 special character should be there in password")
-            return HttpResponse("Error atleast 1 special character should be there in password", status=404)
+            return HttpResponse("Error atleast 1 special character should be there in password", status=401)
         if(body['pass1'] != body['pass2']):
             print("Error password doesn't matched")
             return HttpResponse("Error password doesn't matched", status=401)
         p = body['pass1']
         p = (hashlib.md5(p.encode())).hexdigest()
         doctors.objects.create(fname=body['fname'], lname=body['lname'], college=body['college'], cgpa=body['cgpa'], degree=body['degree'],
-                                mail=body['mail'], phone=body['phone'], dob=body['dob'], user=body['user'], pass1=p)
+                               mail=body['mail'], phone=body['phone'], dob=body['dob'], user=body['user'], pass1=p)
         print("Success account created")
         return HttpResponse("Success account created", status=201)
 
 
 def login(request):
-    if(request.method=="POST"):
+    if(request.method == "POST"):
         body = json.loads(request.body)
+        print(body)
         p = body['pass1']
         p = (hashlib.md5(p.encode())).hexdigest()
         x = doctors.objects.filter(user=body['user'], pass1=p)
@@ -74,12 +75,117 @@ def login(request):
             print("Wrong username or password")
             return HttpResponse("Wrong username or password", status=401)
         else:
-            print("Success")
-            return HttpResponse("Success", status=201)
+            data = doctors.objects.get(user=body['user'])
+            data = {'user': data.user}
+            return HttpResponse(json.dumps(data), status=201)
 
 
 def getdoctor(request):
-    if(request.method=="POST"):
-        x=doctors.objects.all()
-        data=serializers.serialize("json",x)
-        return HttpResponse(data,content_type="application/json")
+    if(request.method == "POST"):
+        x = doctors.objects.all()
+        data = serializers.serialize("json", x)
+        return HttpResponse(data, content_type="application/json")
+
+
+def getpatient(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        print(body)
+        x = appoint.objects.filter(doctor=body['doctor'])
+        data = serializers.serialize('json', x)
+        # data={'user':x[0].user}
+        return HttpResponse(data, content_type='application/json', status=200)
+
+
+def doctordetail(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        print(body)
+        data = doctors.objects.get(user=body['user'])
+        x = {'fname': data.fname, 'lname': data.lname, 'mail': data.mail, 'degree': data.degree,
+             'phone': data.phone, 'college': data.college, 'cgpa': str(data.cgpa), 'user': data.user}
+        return HttpResponse(json.dumps(x), status=200)
+
+
+def updatehistory(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        print(body)
+        data = patientrecord.objects.get(user=body['user'])
+        data.mhistory = body['mhistory']
+        data.save()
+        return HttpResponse('Success', status=200)
+
+
+def updateprescription(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        print(body)
+        data = patientrecord.objects.get(user=body['user'])
+        data.prescription = body['prescription']
+        data.save()
+        return HttpResponse('Success', status=200)
+
+
+def addappointment(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        x = patient.objects.get(user=body['user'])
+        y = doctors.objects.get(user=body['doctor'])
+        appoint.objects.create(
+            user=x, doctor=y, appointment=body['appointment'], appoint='booked', pay='pending')
+        return HttpResponse('Success', status=200)
+
+
+def delappointment(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        print(body)
+        data = appoint.objects.get(
+            user=body['user'], appointment=body['appointment'], doctor=body['doctor'])
+        data.delete()
+        return HttpResponse('Success', status=200)
+
+
+def updateappointment(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        print(body)
+        data = appoint.objects.get(
+            user=body['user'], appointment=body['appointment'], doctor=body['doctor'])
+        data.appointment = body['newappoint']
+        data.appoint = 'booked'
+        data.pay = 'pending'
+        data.save()
+        return HttpResponse('Success', status=200)
+
+
+def pending(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        print(body)
+        a = appoint.objects.filter(doctor=body['user'], appoint='dpending')
+        a = serializers.serialize('json', a)
+        return HttpResponse(a, content_type='application/json')
+
+
+def booked(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        print(body)
+        a = appoint.objects.filter(
+            doctor=body['user'], appoint='booked', pay='paid')
+        a = serializers.serialize('json', a)
+        return HttpResponse(a, content_type='application/json')
+
+
+def approveappoint(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        print(body)
+        data = appoint.objects.get(
+            user=body['user'], appointment=body['appointment'], doctor=body['doctor'])
+        data.appoint='booked'
+        data.pay='pending'
+        data.save()
+        return HttpResponse('Success', status=200)

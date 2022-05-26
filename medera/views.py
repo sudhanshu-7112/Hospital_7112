@@ -3,7 +3,8 @@ import json
 import re
 from django.http import HttpResponse
 from doctor.models import doctors
-from medera.models import patient, patientrecord
+from django.core import serializers
+from medera.models import appoint, patient, patientrecord
 from receptionist.views import appointments
 
 # Create your views here.
@@ -12,7 +13,7 @@ from receptionist.views import appointments
 def register(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
-        print(request.body)
+        print(body)
         x = patient.objects.filter(user=body['user'])
         if(x.exists()):
             print("Already exist user")
@@ -26,7 +27,7 @@ def register(request):
         if((not re.search("[a-zA-Z0-9]+@[A-Za-z0-9]+\.[A-Z|a-z]{2,}", body['mail'])) or body['mail'] == ""):
             print("Error invalid mail")
             return HttpResponse("Error invalid mail", status=401)
-        if(body['phone'] < 100000000 or body['phone'] > 9999999999):
+        if(body['phone'] < 1000000000 or body['phone'] > 9999999999):
             print("Invalid phone number")
             return HttpResponse("Invalid Phone number", status=401)
         if(body['user'].strip() == ""):
@@ -49,16 +50,16 @@ def register(request):
             return HttpResponse("Error 1 small letter should be in password", status=401)
         if(not re.search("[@#$%&*]", body['pass1'])):
             print("Error atleast 1 special character should be there in password")
-            return HttpResponse("Error atleast 1 special character should be there in password", status=404)
+            return HttpResponse("Error atleast 1 special character should be there in password", status=401)
         if(body['pass1'] != body['pass2']):
             print("Error password doesn't matched")
             return HttpResponse("Error password doesn't matched", status=401)
         p = body['pass1']
         p = (hashlib.md5(p.encode())).hexdigest()
-        r=doctors.objects.get(user=body['doctor'])
-        patient.objects.create(fname=body['fname'], lname=body['lname'],
-                                mail=body['mail'], phone=body['phone'], doctor_id=r, user=body['user'], pass1=p)
+        r=patient.objects.create(fname=body['fname'], lname=body['lname'],
+                                mail=body['mail'], phone=body['phone'], gender=body['gender'], user=body['user'], pass1=p)
         print("Success account created")
+        patientrecord.objects.create(user=r)
         return HttpResponse("Success account created", status=201)
 
 
@@ -66,6 +67,7 @@ def register(request):
 def login(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
+        print(body)
         p = body['pass1']
         p = (hashlib.md5(p.encode())).hexdigest()
         x = patient.objects.filter(user=body['user'], pass1=p)
@@ -78,13 +80,12 @@ def login(request):
 
 def phome(request):
     body=json.loads(request.body)
-    try:
-        z=patientrecord.objects.get(user=body['user'])
-    except:
-        x=patient.objects.get(user=body['user'])
-        z=patientrecord(user=x)
-        z.save()
-    return HttpResponse(z,content_type="application/json")
+    print(body)
+    x=patient.objects.get(user=body['user'])
+    z=patientrecord(user=x)        
+    z.save()
+    d={'fname':x.fname,'lname':x.lname,'mail':x.mail,'gender':x.gender,'user':x.user,'phone':x.phone}
+    return HttpResponse(json.dumps(d),status=200)
 
 
 
@@ -93,8 +94,7 @@ def appointment(request):
         body=json.loads(request.body)
         print(body)
         y=doctors.objects.get(user=body['doctor'])
-        z=appointments.objects.get(user=body['user'])
-        z.appointment=body['appointment']
-        z.doctor=y
+        x=patient.objects.get(user=body['user'])
+        z=appoint(user=x,doctor=y,appointment=body['appointment'])
         z.save()
         return HttpResponse("Success")

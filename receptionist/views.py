@@ -1,6 +1,6 @@
 import json
 from django.http import HttpResponse
-from django.shortcuts import render
+from doctor.models import doctors
 from medera.models import appoint
 from receptionist.models import reclogin
 from django.core import serializers
@@ -10,6 +10,7 @@ from django.core import serializers
 def login(request):
     if(request.method=="POST"):
         body=json.loads(request.body)
+        print(body)
         x=reclogin.objects.filter(user=body['user'],pass1=body['pass1'])
         if(not x.exists()):
             print("Wrong username or password")
@@ -20,7 +21,49 @@ def login(request):
 
 def appointments(request):
     if(request.method=="POST"):
-        x=appoint.objects.filter(appointdetails='pending')
+        x=appoint.objects.filter(appoint='pending')
         data=serializers.serialize('json',x)
         print(data)
         return HttpResponse(data,content_type='application/json')
+
+
+def payment(request):
+    if(request.method=="POST"):
+        body=json.loads(request.body)
+        print(body)
+        x=appoint.objects.filter(user=body['user'], appointment=body['appoint'], appoint='booked')[0]
+        x.pay='paid'
+        x.save()
+        return HttpResponse("Success",status=200)
+
+
+def approveappoint(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        data = appoint.objects.get(
+            user=body['user'], appointment=body['appointment'], doctor=body['doctor'])
+        data.appoint='dpending'
+        data.save()
+        return HttpResponse('Success', status=200)
+
+
+def dynamic1(request):
+    if(request.method == "POST"):
+        data=doctors.objects.all()
+        #data=serializers.serialize('json',data)
+        x=[]
+        for i in data:
+            d={'user':i.user}
+            x.append(d)
+        return HttpResponse(json.dumps(x),status=200)
+
+
+def dynamic2(request):
+    if(request.method == "POST"):
+        body=json.loads(request.body)
+        data=appoint.objects.filter(doctor=body['doctor'])
+        x=[]
+        for i in data:
+            d={'user':i.user}
+            x.append(d)
+        return HttpResponse(x,status=200)

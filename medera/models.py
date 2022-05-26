@@ -9,7 +9,6 @@ class patient(models.Model):
     mail=models.EmailField(max_length=50, null=False, blank=False)
     phone=models.BigIntegerField(null=False, blank=False)
     gender=models.CharField(max_length=6, default='Male')
-    dob=models.DateTimeField(null=True)
     user=models.CharField(max_length=25, primary_key=True)
     pass1=models.CharField(max_length=100, null=False, blank=False)
 
@@ -23,3 +22,4 @@ class appoint(models.Model):
     doctor=models.ForeignKey('doctor.doctors',on_delete=models.CASCADE)
     appointment=models.DateTimeField()
     appoint=models.CharField(max_length=12, default='pending')
+    pay=models.CharField(max_length=12, default='not booked')
