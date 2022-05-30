@@ -7,5 +7,6 @@ urlpatterns = [
     path('appointment',views.appointment),
     path('home', views.phome),
     path('mhistory',views.mhistory),
-    path('prescription',views.prescription)
+    path('prescription',views.prescription),
+    path('pay',views.pay)
     ]

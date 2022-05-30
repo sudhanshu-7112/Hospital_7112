@@ -116,3 +116,15 @@ def prescription(request):
         y=appoint.objects.get(user=x)
         d={'medical history':y.prescription}
         return HttpResponse(json.dumps(d),status=200)
+
+
+def pay(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        print(body)
+        x=appoint.objects.filter(pay='pending')
+        d=[]
+        for i in x:
+            s={'pay':i.pay}
+            d.append(s)
+        return HttpResponse(json.dumps(d),status=200)
