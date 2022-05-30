@@ -80,8 +80,11 @@ def login(request):
 def getdoctor(request):
     if(request.method == "POST"):
         x = doctors.objects.all()
-        data = serializers.serialize("json", x)
-        return HttpResponse(data, content_type="application/json")
+        d=[]
+        for i in x:
+            s={'user':i.user}
+            d.append(s)
+        return HttpResponse(json.dumps(d), status=200)
 
 
 def getpatient(request):
