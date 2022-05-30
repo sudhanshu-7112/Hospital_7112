@@ -20,3 +20,9 @@ class appoint(models.Model):
     appointment=models.DateTimeField()
     appoint=models.CharField(max_length=12, default='pending')
     pay=models.CharField(max_length=12, default='not booked')
+
+class patientrecord(models.Model):
+    user=models.ForeignKey('medera.patient', on_delete=models.CASCADE)
+    mhistory=models.CharField(max_length=100, null=True)
+    prescription=models.CharField(max_length=100, null=True)
+

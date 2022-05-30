@@ -12,8 +12,3 @@ class patient(models.Model):
     user=models.CharField(max_length=25, primary_key=True)
     pass1=models.CharField(max_length=100, null=False, blank=False)
 
-class patientrecord(models.Model):
-    user=models.ForeignKey(patient, on_delete=models.CASCADE)
-    mhistory=models.CharField(max_length=100, null=True)
-    prescription=models.CharField(max_length=100, null=True)
-

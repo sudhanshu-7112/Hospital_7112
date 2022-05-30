@@ -3,8 +3,8 @@ import json
 import re
 from django.http import HttpResponse
 from django.core import serializers
-from doctor.models import doctors, appoint
-from medera.models import patient, patientrecord
+from doctor.models import doctors, appoint, patientrecord
+from medera.models import patient
 
 # Create your views here.
 

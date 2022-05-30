@@ -3,8 +3,8 @@ import json
 import re
 from django.http import HttpResponse
 from doctor.models import doctors
-from medera.models import patient, patientrecord
-from doctor.models import appoint
+from medera.models import patient
+from doctor.models import appoint, patientrecord
 
 # Create your views here.
 
@@ -100,7 +100,7 @@ def mhistory(request):
         body = json.loads(request.body)
         print(body)
         x=patient.objects.get(user=body['user'])
-        y=appoint.objects.get(user=x)
+        y=patientrecord.objects.get(user=x)
         d={'medical history':y.mhistory}
         return HttpResponse(json.dumps(d),status=200)
 
