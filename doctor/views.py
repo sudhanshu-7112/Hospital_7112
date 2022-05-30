@@ -3,7 +3,6 @@ import json
 import re
 from django.forms import model_to_dict
 from django.http import HttpResponse, JsonResponse
-from django.core import serializers
 from doctor.models import doctors, appoint, patientrecord
 from medera.models import patient
 
@@ -73,11 +72,12 @@ def login(request):
             print("Wrong username or password")
             return HttpResponse("Wrong username or password", status=401)
         else:
-           return HttpResponse("Success",status=200)
+           return JsonResponse({'user':body['user']},status=200, safe=False)
 
 def getdoctor(request):
     if(request.method == "POST"):
         x = list(doctors.objects.all().values())
+        #x=model_to_dict(x)
         return JsonResponse(x,safe=False,  status=200)
 
 
@@ -94,7 +94,7 @@ def doctordetail(request):
         body = json.loads(request.body)
         print(body)
         data = doctors.objects.get(user=body['user'])
-        ddata=model_to_dict(data)
+        data=model_to_dict(data)
         return JsonResponse(data,safe=False, status=200)
 
 
@@ -156,7 +156,7 @@ def pending(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
-        a = list(appoint.objects.filter(doctor=body['user'], appoint='dpending').values())
+        a = list(appoint.objects.filter(doctor=body['user'], appoint='dpending', delete=0).values())
         return JsonResponse(a, safe=False, status=200)
 
 

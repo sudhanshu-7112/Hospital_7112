@@ -23,7 +23,7 @@ def login(request):
 
 def appointments(request):
     if(request.method=="POST"):
-        x=list(appoint.objects.filter(appoint='pending').values())
+        x=list(appoint.objects.filter(appoint='pending', delete=0).values())
         print(x)
         return JsonResponse(x, safe=False)
 
@@ -32,7 +32,7 @@ def payment(request):
     if(request.method=="POST"):
         body=json.loads(request.body)
         print(body)
-        x=appoint.objects.filter(user=body['user'], appointment=body['appoint'], appoint='booked')[0]
+        x=appoint.objects.get(user=body['user'], appointment=body['appoint'], appoint='booked')
         x.pay='paid'
         x.save()
         return HttpResponse("Success",status=200)
