@@ -100,8 +100,11 @@ def mhistory(request):
         body = json.loads(request.body)
         print(body)
         x=patient.objects.get(user=body['user'])
-        y=patientrecord.objects.get(user=x)
-        d={'medical history':y.mhistory}
+        y=patientrecord.objects.filter(user=x)
+        d=[]
+        for i in y:
+            s={'medical history':i.mhistory}
+            d.append(s)
         return HttpResponse(json.dumps(d),status=200)
 
 
