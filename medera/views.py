@@ -1,7 +1,8 @@
 import hashlib
 import json
 import re
-from django.http import HttpResponse
+from django.forms import model_to_dict
+from django.http import HttpResponse, JsonResponse
 from doctor.models import doctors
 from medera.models import patient
 from doctor.models import appoint, patientrecord
@@ -79,9 +80,8 @@ def phome(request):
     body = json.loads(request.body)
     print(body)
     x = patient.objects.get(user=body['user'])
-    d = {'fname': x.fname, 'lname': x.lname, 'mail': x.mail,
-         'gender': x.gender, 'user': x.user, 'phone': x.phone}
-    return HttpResponse(json.dumps(d), status=200)
+    x=model_to_dict(x)
+    return JsonResponse(x, safe=False, status=200)
 
 
 def appointment(request):
@@ -100,12 +100,8 @@ def mhistory(request):
         body = json.loads(request.body)
         print(body)
         x=patient.objects.get(user=body['user'])
-        y=patientrecord.objects.filter(user=x)
-        d=[]
-        for i in y:
-            s={'mhistory':i.mhistory}
-            d.append(s)
-        return HttpResponse(json.dumps(d),status=200)
+        y=list(patientrecord.objects.filter(user=x).values())
+        return JsonResponse(y,safe=False, status=200)
 
 
 def prescription(request):
@@ -114,21 +110,13 @@ def prescription(request):
         print(body)
         x=patient.objects.get(user=body['user'])
         y=appoint.objects.filter(user=x)
-        y=patientrecord.objects.filter(user=x)
-        d=[]
-        for i in y:
-            s={'mhistory':i.mhistory}
-            d.append(s)
-        return HttpResponse(json.dumps(d),status=200)
+        y=list(patientrecord.objects.filter(user=x).values())
+        return JsonResponse(y,safe=False, status=200)
 
 
 def pay(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
-        x=appoint.objects.filter(pay='pending')
-        d=[]
-        for i in x:
-            s={'pay':i.pay}
-            d.append(s)
-        return HttpResponse(json.dumps(d),status=200)
+        x=list(appoint.objects.filter(pay='pending', user=body['user']).values())
+        return JsonResponse(x,safe=False, status=200)

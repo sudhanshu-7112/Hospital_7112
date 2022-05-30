@@ -1,4 +1,5 @@
 from django.db import models
+from django.forms import BooleanField, IntegerField
 
 # Create your models here.
 
@@ -20,6 +21,7 @@ class appoint(models.Model):
     appointment=models.DateTimeField()
     appoint=models.CharField(max_length=12, default='pending')
     pay=models.CharField(max_length=12, default='not booked')
+    delete=models.IntegerField(default=0)
 
 class patientrecord(models.Model):
     user=models.ForeignKey('medera.patient', on_delete=models.CASCADE)

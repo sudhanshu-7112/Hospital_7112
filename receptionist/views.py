@@ -1,5 +1,5 @@
 import json
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from doctor.models import doctors
 from medera.models import patient
 from doctor.models import appoint
@@ -23,10 +23,9 @@ def login(request):
 
 def appointments(request):
     if(request.method=="POST"):
-        x=appoint.objects.filter(appoint='pending')
-        data=serializers.serialize('json',x)
-        print(data)
-        return HttpResponse(data,content_type='application/json')
+        x=list(appoint.objects.filter(appoint='pending').values())
+        print(x)
+        return JsonResponse(x, safe=False)
 
 
 def payment(request):
@@ -52,33 +51,19 @@ def approveappoint(request):
 def dynamic1(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
-        data=doctors.objects.filter(gender=body['gender'])
-        #data=serializers.serialize('json',data)
-        x=[]
-        for i in data:
-            d={'user':i.user, 'fname':i.fname, 'lname':i.lname, 'mail':i.mail, 'phone':i.phone}
-            x.append(d)
-        print(x)
-        return HttpResponse(json.dumps(x),status=200)
+        data=list(doctors.objects.filter(gender=body['gender']).values())
+        return JsonResponse(data, safe=False, status=200)
 
 
 def dynamic2(request):
     if(request.method == "POST"):
         body=json.loads(request.body)
-        data=appoint.objects.filter(doctor=body['doctor'])
-        x=[]
-        for i in data:
-            d={'user':i.user}
-            x.append(d)
-        return HttpResponse(json.dumps(x),status=200)
+        data=list(appoint.objects.filter(doctor=body['doctor']).values())
+        return JsonResponse(data, safe=False, status=200)
 
 
 def allpatient(request):
     if(request.method == "POST"):
         body=json.loads(request.body)
-        data=patient.objects.filter(gender=body['gender'])
-        x=[]
-        for i in data:
-            d={'user':i.user,'fname':i.fname, 'lname':i.lname, 'mail':i.mail, 'phone':i.phone}
-            x.append(d)
-        return HttpResponse(json.dumps(x),status=200)
+        data=list(patient.objects.filter(gender=body['gender']).values())
+        return HttpResponse(data, safe=False, status=200)

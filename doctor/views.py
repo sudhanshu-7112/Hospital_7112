@@ -1,7 +1,8 @@
 import hashlib
 import json
 import re
-from django.http import HttpResponse
+from django.forms import model_to_dict
+from django.http import HttpResponse, JsonResponse
 from django.core import serializers
 from doctor.models import doctors, appoint, patientrecord
 from medera.models import patient
@@ -72,29 +73,20 @@ def login(request):
             print("Wrong username or password")
             return HttpResponse("Wrong username or password", status=401)
         else:
-            data = doctors.objects.get(user=body['user'])
-            data = {'user': data.user}
-            return HttpResponse(json.dumps(data), status=201)
-
+           return HttpResponse("Success",status=200)
 
 def getdoctor(request):
     if(request.method == "POST"):
-        x = doctors.objects.all()
-        d=[]
-        for i in x:
-            s={'user':i.user}
-            d.append(s)
-        return HttpResponse(json.dumps(d), status=200)
+        x = list(doctors.objects.all().values())
+        return JsonResponse(x,safe=False,  status=200)
 
 
 def getpatient(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
-        x = appoint.objects.filter(doctor=body['doctor'])
-        data = serializers.serialize('json', x)
-        # data={'user':x[0].user}
-        return HttpResponse(data, content_type='application/json', status=200)
+        x = list(appoint.objects.filter(doctor=body['doctor']).values())
+        return JsonResponse(x,safe=False , status=200)
 
 
 def doctordetail(request):
@@ -102,9 +94,8 @@ def doctordetail(request):
         body = json.loads(request.body)
         print(body)
         data = doctors.objects.get(user=body['user'])
-        x = {'fname': data.fname, 'lname': data.lname, 'mail': data.mail, 'degree': data.degree,
-             'phone': data.phone, 'college': data.college, 'gender': data.gender, 'user': data.user}
-        return HttpResponse(json.dumps(x), status=200)
+        ddata=model_to_dict(data)
+        return JsonResponse(data,safe=False, status=200)
 
 
 def updatehistory(request):
@@ -143,7 +134,8 @@ def delappointment(request):
         print(body)
         data = appoint.objects.get(
             user=body['user'], appointment=body['appointment'], doctor=body['doctor'])
-        data.delete()
+        data.delete=1
+        data.save()
         return HttpResponse('Success', status=200)
 
 
@@ -151,12 +143,12 @@ def updateappointment(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
-        data = appoint.objects.filter(
+        data = appoint.objects.get(
             user=body['user'], appointment=body['appointment'], doctor=body['doctor'],appoint='booked')
         data.appointment = body['newappoint']
         data.appoint = 'booked'
         data.pay = 'pending'
-        data[0].save()
+        data.save()
         return HttpResponse('Success', status=200)
 
 
@@ -164,19 +156,16 @@ def pending(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
-        a = appoint.objects.filter(doctor=body['user'], appoint='dpending')
-        a = serializers.serialize('json', a)
-        return HttpResponse(a, content_type='application/json')
+        a = list(appoint.objects.filter(doctor=body['user'], appoint='dpending').values())
+        return JsonResponse(a, safe=False, status=200)
 
 
 def booked(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
-        a = appoint.objects.filter(
-            doctor=body['user'], appoint='booked')
-        a = serializers.serialize('json', a)
-        return HttpResponse(a, content_type='application/json')
+        a = list(appoint.objects.filter(doctor=body['user'], appoint='booked').values())
+        return JsonResponse(a, safe=False, status=200)
 
 
 def approveappoint(request):
