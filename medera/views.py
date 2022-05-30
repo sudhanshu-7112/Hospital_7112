@@ -5,7 +5,6 @@ from django.http import HttpResponse
 from doctor.models import doctors
 from medera.models import patient, patientrecord
 from doctor.models import appoint
-from receptionist.views import appointments
 
 # Create your views here.
 
