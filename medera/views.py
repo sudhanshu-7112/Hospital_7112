@@ -113,7 +113,7 @@ def prescription(request):
         body = json.loads(request.body)
         print(body)
         x=patient.objects.get(user=body['user'])
-        y=appoint.objects.get(user=x)
+        y=appoint.objects.filter(user=x)
         y=patientrecord.objects.filter(user=x)
         d=[]
         for i in y:
