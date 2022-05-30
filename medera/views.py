@@ -114,7 +114,11 @@ def prescription(request):
         print(body)
         x=patient.objects.get(user=body['user'])
         y=appoint.objects.get(user=x)
-        d={'medical history':y.prescription}
+        y=patientrecord.objects.filter(user=x)
+        d=[]
+        for i in y:
+            s={'mhistory':i.mhistory}
+            d.append(s)
         return HttpResponse(json.dumps(d),status=200)
 
 
