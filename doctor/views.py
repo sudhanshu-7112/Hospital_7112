@@ -111,7 +111,7 @@ def updatehistory(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
-        data = patientrecord.objects.get(user=body['user'])
+        data = patientrecord.objects.create(user=body['user'])
         data.mhistory = body['mhistory']
         data.save()
         return HttpResponse('Success', status=200)
@@ -121,7 +121,7 @@ def updateprescription(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
-        data = patientrecord.objects.get(user=body['user'])
+        data = patientrecord.objects.create(user=body['user'])
         data.prescription = body['prescription']
         data.save()
         return HttpResponse('Success', status=200)
