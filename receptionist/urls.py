@@ -8,5 +8,6 @@ urlpatterns = [
     path('payment',views.payment),
     path('approve',views.approveappoint),
     path('d1',views.dynamic1),
-    path('d2',views.dynamic2)
+    path('d2',views.dynamic2),
+    path('allpatient',views.allpatient)
 ]

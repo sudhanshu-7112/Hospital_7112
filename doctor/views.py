@@ -3,8 +3,8 @@ import json
 import re
 from django.http import HttpResponse
 from django.core import serializers
-from doctor.models import doctors
-from medera.models import appoint, patient, patientrecord
+from doctor.models import doctors, appoint
+from medera.models import patient, patientrecord
 
 # Create your views here.
 
@@ -32,9 +32,6 @@ def register(request):
         if(body['user'].strip() == ""):
             print("Invalid User")
             return HttpResponse("Invalid User", status=401)
-        if(body['cgpa'] > 10):
-            print("Invalid cgpa")
-            return HttpResponse("Invalid cgpa", status=401)
         if(body['pass1'] == "" or body['pass2'] == ""):
             print("Error Enter Password")
             return HttpResponse("Error Enter Password", status=401)
@@ -58,7 +55,7 @@ def register(request):
             return HttpResponse("Error password doesn't matched", status=401)
         p = body['pass1']
         p = (hashlib.md5(p.encode())).hexdigest()
-        doctors.objects.create(fname=body['fname'], lname=body['lname'], college=body['college'], cgpa=body['cgpa'], degree=body['degree'],
+        doctors.objects.create(fname=body['fname'], lname=body['lname'], college=body['college'], gender=body['gender'], degree=body['degree'],
                                mail=body['mail'], phone=body['phone'], dob=body['dob'], user=body['user'], pass1=p)
         print("Success account created")
         return HttpResponse("Success account created", status=201)
@@ -103,7 +100,7 @@ def doctordetail(request):
         print(body)
         data = doctors.objects.get(user=body['user'])
         x = {'fname': data.fname, 'lname': data.lname, 'mail': data.mail, 'degree': data.degree,
-             'phone': data.phone, 'college': data.college, 'cgpa': str(data.cgpa), 'user': data.user}
+             'phone': data.phone, 'college': data.college, 'gender': data.gender, 'user': data.user}
         return HttpResponse(json.dumps(x), status=200)
 
 
@@ -151,12 +148,12 @@ def updateappointment(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
-        data = appoint.objects.get(
-            user=body['user'], appointment=body['appointment'], doctor=body['doctor'])
+        data = appoint.objects.filter(
+            user=body['user'], appointment=body['appointment'], doctor=body['doctor'],appoint='booked')
         data.appointment = body['newappoint']
         data.appoint = 'booked'
         data.pay = 'pending'
-        data.save()
+        data[0].save()
         return HttpResponse('Success', status=200)
 
 
@@ -174,7 +171,7 @@ def booked(request):
         body = json.loads(request.body)
         print(body)
         a = appoint.objects.filter(
-            doctor=body['user'], appoint='booked', pay='paid')
+            doctor=body['user'], appoint='booked')
         a = serializers.serialize('json', a)
         return HttpResponse(a, content_type='application/json')
 

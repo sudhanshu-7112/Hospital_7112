@@ -4,7 +4,8 @@ import re
 from django.http import HttpResponse
 from doctor.models import doctors
 from django.core import serializers
-from medera.models import appoint, patient, patientrecord
+from medera.models import patient, patientrecord
+from doctor.models import appoint
 from receptionist.views import appointments
 
 # Create your views here.
@@ -56,12 +57,11 @@ def register(request):
             return HttpResponse("Error password doesn't matched", status=401)
         p = body['pass1']
         p = (hashlib.md5(p.encode())).hexdigest()
-        r=patient.objects.create(fname=body['fname'], lname=body['lname'],
-                                mail=body['mail'], phone=body['phone'], gender=body['gender'], user=body['user'], pass1=p)
+        r = patient.objects.create(fname=body['fname'], lname=body['lname'],
+                                   mail=body['mail'], phone=body['phone'], gender=body['gender'], user=body['user'], pass1=p)
         print("Success account created")
         patientrecord.objects.create(user=r)
         return HttpResponse("Success account created", status=201)
-
 
 
 def login(request):
@@ -74,27 +74,44 @@ def login(request):
         if(not x.exists()):
             return HttpResponse("Wrong username or password", status=401)
         else:
-            return HttpResponse("success",status=200)
-
+            return HttpResponse("success", status=200)
 
 
 def phome(request):
-    body=json.loads(request.body)
+    body = json.loads(request.body)
     print(body)
-    x=patient.objects.get(user=body['user'])
-    z=patientrecord(user=x)        
-    z.save()
-    d={'fname':x.fname,'lname':x.lname,'mail':x.mail,'gender':x.gender,'user':x.user,'phone':x.phone}
-    return HttpResponse(json.dumps(d),status=200)
-
+    x = patient.objects.get(user=body['user'])
+    d = {'fname': x.fname, 'lname': x.lname, 'mail': x.mail,
+         'gender': x.gender, 'user': x.user, 'phone': x.phone}
+    return HttpResponse(json.dumps(d), status=200)
 
 
 def appointment(request):
-    if(request.method=="POST"):
-        body=json.loads(request.body)
+    if(request.method == "POST"):
+        body = json.loads(request.body)
         print(body)
-        y=doctors.objects.get(user=body['doctor'])
-        x=patient.objects.get(user=body['user'])
-        z=appoint(user=x,doctor=y,appointment=body['appointment'])
+        y = doctors.objects.get(user=body['doctor'])
+        x = patient.objects.get(user=body['user'])
+        z = appoint(user=x, doctor=y, appointment=body['appointment'])
         z.save()
         return HttpResponse("Success")
+
+
+def mhistory(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        print(body)
+        x=patient.objects.get(user=body['user'])
+        y=appoint.objects.get(user=x)
+        d={'medical history':y.mhistory}
+        return HttpResponse(json.dumps(d),status=200)
+
+
+def prescription(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        print(body)
+        x=patient.objects.get(user=body['user'])
+        y=appoint.objects.get(user=x)
+        d={'medical history':y.prescription}
+        return HttpResponse(json.dumps(d),status=200)

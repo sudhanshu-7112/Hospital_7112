@@ -11,5 +11,12 @@ class doctors(models.Model):
     dob=models.DateTimeField(null=True)
     college=models.CharField(max_length=25, null=False, blank=False)
     degree=models.CharField(max_length=10, null=False, blank=False)
-    cgpa=models.DecimalField(max_digits=4, decimal_places=2, null=False, blank=False)
+    gender=models.CharField(max_length=6, default='Male')
     pass1=models.CharField(max_length=100, null=True, blank=True)
+
+class appoint(models.Model):
+    user=models.ForeignKey('medera.patient',on_delete=models.CASCADE)
+    doctor=models.ForeignKey('doctor.doctors',on_delete=models.CASCADE)
+    appointment=models.DateTimeField()
+    appoint=models.CharField(max_length=12, default='pending')
+    pay=models.CharField(max_length=12, default='not booked')

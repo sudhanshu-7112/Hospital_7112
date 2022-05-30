@@ -17,9 +17,3 @@ class patientrecord(models.Model):
     mhistory=models.CharField(max_length=100, null=True)
     prescription=models.CharField(max_length=100, null=True)
 
-class appoint(models.Model):
-    user=models.ForeignKey(patient,on_delete=models.CASCADE)
-    doctor=models.ForeignKey('doctor.doctors',on_delete=models.CASCADE)
-    appointment=models.DateTimeField()
-    appoint=models.CharField(max_length=12, default='pending')
-    pay=models.CharField(max_length=12, default='not booked')

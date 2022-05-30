@@ -1,7 +1,8 @@
 import json
 from django.http import HttpResponse
 from doctor.models import doctors
-from medera.models import appoint
+from medera.models import patient
+from doctor.models import appoint
 from receptionist.models import reclogin
 from django.core import serializers
 # Create your views here.
@@ -16,7 +17,8 @@ def login(request):
             print("Wrong username or password")
             return HttpResponse("Wrong username or password",status=401)
         else:
-            print("Success",status=200)
+            print("Success")
+            return HttpResponse("Success",status=200)
 
 
 def appointments(request):
@@ -49,12 +51,14 @@ def approveappoint(request):
 
 def dynamic1(request):
     if(request.method == "POST"):
-        data=doctors.objects.all()
+        body = json.loads(request.body)
+        data=doctors.objects.filter(gender=body['gender'])
         #data=serializers.serialize('json',data)
         x=[]
         for i in data:
-            d={'user':i.user}
+            d={'user':i.user, 'fname':i.fname, 'lname':i.lname, 'mail':i.mail, 'phone':i.phone}
             x.append(d)
+        print(x)
         return HttpResponse(json.dumps(x),status=200)
 
 
@@ -66,4 +70,15 @@ def dynamic2(request):
         for i in data:
             d={'user':i.user}
             x.append(d)
-        return HttpResponse(x,status=200)
+        return HttpResponse(json.dumps(x),status=200)
+
+
+def allpatient(request):
+    if(request.method == "POST"):
+        body=json.loads(request.body)
+        data=patient.objects.filter(gender=body['gender'])
+        x=[]
+        for i in data:
+            d={'user':i.user,'fname':i.fname, 'lname':i.lname, 'mail':i.mail, 'phone':i.phone}
+            x.append(d)
+        return HttpResponse(json.dumps(x),status=200)

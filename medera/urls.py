@@ -5,6 +5,7 @@ urlpatterns = [
     path('register',views.register),
     path('login',views.login),
     path('appointment',views.appointment),
-    path('home', views.phome)
-    
-]
+    path('home', views.phome),
+    path('mhistory',views.mhistory),
+    path('prescription',views.prescription)
+    ]
