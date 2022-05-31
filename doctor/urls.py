@@ -15,6 +15,7 @@ urlpatterns=[
     path('updateappointments',views.updateappointment),
     path('pending',views.pending),
     path('booked',views.booked),
-    path('approve',views.approveappoint)
+    path('approve',views.approveappoint),
+    path('logout',views.logout)
 
 ]

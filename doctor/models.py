@@ -25,6 +25,6 @@ class appoint(models.Model):
 
 class patientrecord(models.Model):
     user=models.ForeignKey('medera.patient', on_delete=models.CASCADE)
-    mhistory=models.CharField(max_length=100, null=True)
-    prescription=models.CharField(max_length=100, null=True)
+    mhistory=models.CharField(max_length=100, null=False, default='Nothing to Show')
+    prescription=models.CharField(max_length=100, null=False, default='Nothing to show')
 

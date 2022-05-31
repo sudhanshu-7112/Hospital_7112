@@ -74,12 +74,15 @@ def login(request):
         if(not x.exists()):
             return HttpResponse("Wrong username or password", status=401)
         else:
+            request.session['id']=x[0].user
             return HttpResponse("success", status=200)
 
 
 def phome(request):
     body = json.loads(request.body)
     print(body)
+    #if(request.session['id']!=body['user'] or request.session['id']==None):
+     #    return HttpResponse("Error",status=403)
     x = patient.objects.get(user=body['user'])
     x=model_to_dict(x)
     return JsonResponse(x, safe=False, status=200)
@@ -89,6 +92,8 @@ def appointment(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
+        # if(request.session['id']!=body['user']):
+        #     return HttpResponse("Error",status=403)
         y = doctors.objects.get(user=body['doctor'])
         x = patient.objects.get(user=body['user'])
         z = appoint(user=x, doctor=y, appointment=body['appointment'])
@@ -100,6 +105,8 @@ def mhistory(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
+        # if(request.session['id']!=body['user']):
+        #     return HttpResponse("Error",status=403)
         x=patient.objects.get(user=body['user'])
         y=list(patientrecord.objects.filter(user=x).values())
         # response=HttpResponse(content_type='application/pdf')
@@ -116,6 +123,8 @@ def prescription(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
+        # if(request.session['id']!=body['user']):
+        #     return HttpResponse("Error",status=403)
         x=patient.objects.get(user=body['user'])
         y=appoint.objects.filter(user=x)
         y=list(patientrecord.objects.filter(user=x).values())
@@ -133,5 +142,15 @@ def pay(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
+        # if(request.session['id']!=body['user']):
+        #     return HttpResponse("Error",status=403)
         x=list(appoint.objects.filter(pay='pending', user=body['user']).values())
         return JsonResponse(x,safe=False, status=200)
+
+
+def logout(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        print(body)
+        del request.session['id']
+        return HttpResponse("Logout Succesfully")

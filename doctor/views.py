@@ -72,10 +72,14 @@ def login(request):
             print("Wrong username or password")
             return HttpResponse("Wrong username or password", status=401)
         else:
-           return JsonResponse({'user':body['user']},status=200, safe=False)
+            request.session['id']=x[0].user
+            return JsonResponse({'user':body['user']},status=200, safe=False)
 
 def getdoctor(request):
     if(request.method == "POST"):
+        body = json.loads(request.body)
+        # if(request.session['id']!=body['user']):
+        #     return HttpResponse("Error",status=403)
         x = list(doctors.objects.all().values())
         #x=model_to_dict(x)
         return JsonResponse(x,safe=False,  status=200)
@@ -85,6 +89,8 @@ def getpatient(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
+        # if(request.session['id']!=body['user']):
+        #     return HttpResponse("Error",status=403)
         x = list(appoint.objects.filter(doctor=body['doctor']).values())
         return JsonResponse(x,safe=False , status=200)
 
@@ -93,6 +99,8 @@ def doctordetail(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
+        # if(request.session['id']!=body['user']):
+        #     return HttpResponse("Error",status=403)
         data = doctors.objects.get(user=body['user'])
         data=model_to_dict(data)
         return JsonResponse(data,safe=False, status=200)
@@ -102,6 +110,8 @@ def updatehistory(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
+        # if(request.session['id']!=body['user']):
+        #     return HttpResponse("Error",status=403)
         data = patientrecord.objects.create(user=body['user'])
         data.mhistory = body['mhistory']
         data.save()
@@ -112,7 +122,10 @@ def updateprescription(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
-        data = patientrecord.objects.create(user=body['user'])
+        # if(request.session['id']!=body['user']):
+        #     return HttpResponse("Error",status=403)
+        x=patient.objects.get(user=body['user'])
+        data = patientrecord.objects.create(user=x)
         data.prescription = body['prescription']
         data.save()
         return HttpResponse('Success', status=200)
@@ -121,6 +134,8 @@ def updateprescription(request):
 def addappointment(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
+        # if(request.session['id']!=body['user']):
+        #     return HttpResponse("Error",status=403)
         x = patient.objects.get(user=body['user'])
         y = doctors.objects.get(user=body['doctor'])
         appoint.objects.create(
@@ -132,8 +147,9 @@ def delappointment(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
-        data = appoint.objects.get(
-            user=body['user'], appointment=body['appointment'], doctor=body['doctor'])
+        # if(request.session['id']!=body['user']):
+        #     return HttpResponse("Error",status=403)
+        data = appoint.objects.get(id=body['id'])
         data.delete=1
         data.save()
         return HttpResponse('Success', status=200)
@@ -143,8 +159,9 @@ def updateappointment(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
-        data = appoint.objects.get(
-            user=body['user'], appointment=body['appointment'], doctor=body['doctor'],appoint='booked')
+        # if(request.session['id']!=body['user']):
+        #     return HttpResponse("Error",status=403)
+        data = appoint.objects.get(id=body['id'])
         data.appointment = body['newappoint']
         data.appoint = 'booked'
         data.pay = 'pending'
@@ -156,6 +173,8 @@ def pending(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
+        # if(request.session['id']!=body['user']):
+        #     return HttpResponse("Error",status=403)
         a = list(appoint.objects.filter(doctor=body['user'], appoint='dpending', delete=0).values())
         return JsonResponse(a, safe=False, status=200)
 
@@ -164,7 +183,9 @@ def booked(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
-        a = list(appoint.objects.filter(doctor=body['user'], appoint='booked').values())
+        #if(request.session['id']!=body['user']):
+        #    return HttpResponse("Error",status=403)
+        a = list(appoint.objects.filter(doctor=body['user'], appoint='booked', delete=0).values())
         return JsonResponse(a, safe=False, status=200)
 
 
@@ -172,9 +193,18 @@ def approveappoint(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
-        data = appoint.objects.get(
-            user=body['user'], appointment=body['appointment'], doctor=body['doctor'])
+        # if(request.session['id']!=body['user']):
+        #     return HttpResponse("Error",status=403)
+        data = appoint.objects.get(id=body['id'])
         data.appoint='booked'
         data.pay='pending'
         data.save()
         return HttpResponse('Success', status=200)
+
+
+def logout(request):
+    if(request.method == "POST"):
+        body = json.loads(request.body)
+        print(body)
+        del request.session['id']
+        return HttpResponse("Logout Succesfully")
