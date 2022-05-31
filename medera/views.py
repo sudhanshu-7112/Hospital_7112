@@ -1,6 +1,7 @@
 import hashlib
 import json
 import re
+from reportlab.pdfgen import canvas
 from django.forms import model_to_dict
 from django.http import HttpResponse, JsonResponse
 from doctor.models import doctors
@@ -101,6 +102,13 @@ def mhistory(request):
         print(body)
         x=patient.objects.get(user=body['user'])
         y=list(patientrecord.objects.filter(user=x).values())
+        # response=HttpResponse(content_type='application/pdf')
+        # response['Content-Disposition'] = 'attachment; filename="medical_history.pdf"'
+        # p = canvas.Canvas(response)
+        # p.drawString(100,100,str(y))
+        # p.showPage()
+        # p.save()
+        # return response
         return JsonResponse(y,safe=False, status=200)
 
 
@@ -111,6 +119,13 @@ def prescription(request):
         x=patient.objects.get(user=body['user'])
         y=appoint.objects.filter(user=x)
         y=list(patientrecord.objects.filter(user=x).values())
+        # response=HttpResponse(content_type='application/pdf')
+        # response['Content-Disposition'] = 'attachment; filename="medical_history.pdf"'
+        # p = canvas.Canvas(response)
+        # p.drawString(100,100,str(y))
+        # p.showPage()
+        # p.save()
+        # return response
         return JsonResponse(y,safe=False, status=200)
 
 
