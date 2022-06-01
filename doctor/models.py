@@ -17,7 +17,7 @@ class doctors(models.Model):
 class appoint(models.Model):
     user=models.ForeignKey('medera.patient',on_delete=models.CASCADE)
     doctor=models.ForeignKey('doctor.doctors',on_delete=models.CASCADE)
-    appointment=models.DateTimeField()
+    appointment=models.DateField()
     appoint=models.CharField(max_length=12, default='pending')
     pay=models.CharField(max_length=12, default='not booked')
     delete=models.IntegerField(default=0)
