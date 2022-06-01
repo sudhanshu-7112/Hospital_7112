@@ -4,7 +4,6 @@ from doctor.models import doctors
 from medera.models import patient
 from doctor.models import appoint
 from receptionist.models import reclogin
-from django.core import serializers
 # Create your views here.
 
 
@@ -68,6 +67,7 @@ def dynamic1(request):
 def dynamic2(request):
     if(request.method == "POST"):
         body=json.loads(request.body)
+        print(body)
         # if(request.session['id']!=body['user'] or request.session['id']==None):
         #     return HttpResponse("Error",status=403)
         data=list(appoint.objects.filter(doctor=body['doctor']).values('user').distinct())
@@ -81,12 +81,16 @@ def allpatient(request):
         # if(request.session['id']!=body['user'] or request.session['id']==None):
         #     return HttpResponse("Error",status=403)
         data=list(patient.objects.filter(gender=body['gender']).values())
-        return HttpResponse(data, safe=False, status=200)
+        return JsonResponse(data, safe=False, status=200)
 
 
 def logout(request):
     if(request.method == "POST"):
-        body = json.loads(request.body)
-        print(body)
-        del request.session['id']
+        #del request.session['id']
         return HttpResponse("Logout Succesfully")
+
+
+def doctorname(request):
+    if(request.method=="POST"):
+        data=list(doctors.objects.all().values('user'))
+        return JsonResponse(data, safe=False, status=200)

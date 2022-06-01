@@ -1,5 +1,4 @@
 from django.db import models
-from django.forms import BooleanField, IntegerField
 
 # Create your models here.
 

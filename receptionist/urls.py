@@ -10,5 +10,6 @@ urlpatterns = [
     path('d1',views.dynamic1),
     path('d2',views.dynamic2),
     path('allpatient',views.allpatient),
-    path('logout',views.logout)
+    path('logout',views.logout),
+    path('doctorname',views.doctorname)
 ]

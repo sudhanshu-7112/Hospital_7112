@@ -16,6 +16,7 @@ urlpatterns=[
     path('pending',views.pending),
     path('booked',views.booked),
     path('approve',views.approveappoint),
-    path('logout',views.logout)
+    path('logout',views.logout),
+    path('req',views.give)
 
 ]

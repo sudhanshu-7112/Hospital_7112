@@ -83,7 +83,7 @@ def phome(request):
     print(body)
     #if(request.session['id']!=body['user'] or request.session['id']==None):
      #    return HttpResponse("Error",status=403)
-    x = patient.objects.get(user=body['user'])
+    x = patient.objects.get(user=body['user'].strip())
     x=model_to_dict(x)
     return JsonResponse(x, safe=False, status=200)
 
@@ -150,7 +150,5 @@ def pay(request):
 
 def logout(request):
     if(request.method == "POST"):
-        body = json.loads(request.body)
-        print(body)
-        del request.session['id']
+        #del request.session['id']
         return HttpResponse("Logout Succesfully")

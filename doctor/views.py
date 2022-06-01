@@ -75,6 +75,7 @@ def login(request):
             request.session['id']=x[0].user
             return JsonResponse({'user':body['user']},status=200, safe=False)
 
+
 def getdoctor(request):
     if(request.method == "POST"):
         body = json.loads(request.body)
@@ -204,7 +205,14 @@ def approveappoint(request):
 
 def logout(request):
     if(request.method == "POST"):
+        #del request.session['id']
+        return HttpResponse("Logout Succesfully")
+
+
+def give(request):
+    if(request.method == "POST"):
         body = json.loads(request.body)
         print(body)
-        del request.session['id']
-        return HttpResponse("Logout Succesfully")
+        data=appoint.objects.get(id=body['id'])
+        data=model_to_dict(data)
+        return JsonResponse(data, safe=False)
