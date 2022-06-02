@@ -18,10 +18,12 @@ def register(request):
         x = patient.objects.filter(user=body['user'])
         if(x.exists()):
             print("Already exist user")
-            return HttpResponse("Already exist user", status=401)
+            msg={'msg':'Already exist user'}
+            return JsonResponse(msg, safe=False, status=401)
         if ((re.search("[0-9]", body['fname'].strip())) or body['fname'] == ""):
             print("Error not valid first name")
-            return HttpResponse("Error not valid first name", status=401)
+            msg={'msg':'Error not valid first name'}
+            return JsonResponse(msg, safe=False, status=401)
         if ((re.search("[0-9]", body['lname'].strip())) or body['lname'] == ""):
             print("Error not valid last name")
             return HttpResponse("Error not valid last name", status=401)
